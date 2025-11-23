@@ -1,0 +1,6 @@
+nombre,zona,vida_maxima,ataque,defensa,velocidad,experiencia_otorgada
+Lobo,bosque,50,12,5,12,25
+Orco,bosque,80,18,12,6,40
+Araña Gigante,bosque,40,15,8,14,30
+Esqueleto,cueva,60,14,10,8,35
+Goblin,cueva,45,16,6,10,28

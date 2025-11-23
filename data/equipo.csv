@@ -1,0 +1,5 @@
+nombre,tipo,stat_boost,valor,requerimiento_nivel,precio
+Espada de Acero,arma,ataque,10,1,50
+Armadura de Cuero,armadura,defensa,8,1,40
+Arco Simple,arma,ataque,8,1,45
+Túnica de Mago,armadura,defensa,5,1,35

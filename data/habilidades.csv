@@ -1,0 +1,7 @@
+nombre,clase,daño_base,coste_mana,descripcion
+Golpe Poderoso,guerrero,25,10,Un golpe cargado con fuerza adicional
+Defender,guerrero,0,5,Aumenta la defensa por un turno
+Bola de Fuego,mago,35,20,Proyectil de fuego que quema al enemigo
+Curar,mago,0,25,Cura una cantidad de vida
+Disparo Preciso,arquero,30,15,Disparo que ignora parte de la defensa
+Esquivar,arquero,0,10,Aumenta la velocidad y evasión
