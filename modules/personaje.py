@@ -1,104 +1,96 @@
 import csv
 
-class Personaje:
-    def __init__(self, nombre, clase="guerrero"):
-        self.nombre = nombre
-        self.clase = clase
-        self.nivel = 1
-        self.experiencia = 0
-        self.experiencia_necesaria = 100
-        
-        self.stats_base = self.obtener_stats_base(clase)
-        
-        self.vida_actual = self.stats_base['vida_maxima']
-        self.vida_maxima = self.stats_base['vida_maxima']
-        self.mana_actual = self.stats_base['mana_maximo']
-        self.mana_maximo = self.stats_base['mana_maximo']
-        self.ataque = self.stats_base['ataque']
-        self.defensa = self.stats_base['defensa']
-        self.velocidad = self.stats_base['velocidad']
-        
-        self.equipo = {}
-        self.habilidades = self.obtener_habilidades_iniciales(clase)
-        
-        self.inventario = {
+def obtener_stats_base(clase):
+    stats = {
+        "guerrero": {
+            "vida_maxima": 120,
+            "mana_maximo": 30,
+            "ataque": 18,
+            "defensa": 15,
+            "velocidad": 8
+        },
+        "mago": {
+            "vida_maxima": 80,
+            "mana_maximo": 100,
+            "ataque": 12,
+            "defensa": 8,
+            "velocidad": 10
+        },
+        "arquero": {
+            "vida_maxima": 90,
+            "mana_maximo": 50,
+            "ataque": 16,
+            "defensa": 10,
+            "velocidad": 14
+        }
+    }
+    return stats.get(clase, stats["guerrero"])
+
+def obtener_habilidades_iniciales(clase):
+    habilidades = {
+        "guerrero": ["Golpe Poderoso", "Defender"],
+        "mago": ["Bola de Fuego", "Curar"],
+        "arquero": ["Disparo Preciso", "Esquivar"]
+    }
+    return habilidades.get(clase, ["Ataque Básico"])
+
+def crear_personaje(nombre, clase="guerrero"):
+    stats_base = obtener_stats_base(clase)
+    
+    personaje = {
+        "nombre": nombre,
+        "clase": clase,
+        "nivel": 1,
+        "experiencia": 0,
+        "experiencia_necesaria": 100,
+        "vida_actual": stats_base["vida_maxima"],
+        "vida_maxima": stats_base["vida_maxima"],
+        "mana_actual": stats_base["mana_maximo"],
+        "mana_maximo": stats_base["mana_maximo"],
+        "ataque": stats_base["ataque"],
+        "defensa": stats_base["defensa"],
+        "velocidad": stats_base["velocidad"],
+        "equipo": {},
+        "habilidades": obtener_habilidades_iniciales(clase),
+        "inventario": {
             "Poción de Mana Pequeña": {"cantidad": 3, "tipo": "consumible", "mana": 20},
             "Poción de Mana Grande": {"cantidad": 1, "tipo": "consumible", "mana": 50}
         }
+    }
+    return personaje
+
+def atacar_personaje(personaje, objetivo):
+    from modules.enemigo import recibir_daño_enemigo
+    daño = max(1, personaje["ataque"] - (objetivo["defensa"] // 2))
+    recibir_daño_enemigo(objetivo, daño)
+    return daño
+
+def recibir_daño_personaje(personaje, daño):
+    personaje["vida_actual"] = max(0, personaje["vida_actual"] - daño)
+    return personaje["vida_actual"] > 0
+
+def curar_personaje(personaje, cantidad):
+    personaje["vida_actual"] = min(personaje["vida_maxima"], personaje["vida_actual"] + cantidad)
+
+def esta_vivo_personaje(personaje):
+    return personaje["vida_actual"] > 0
+
+def ganar_experiencia(personaje, exp):
+    personaje["experiencia"] += exp
+    if personaje["experiencia"] >= personaje["experiencia_necesaria"]:
+        subir_nivel(personaje)
+
+def subir_nivel(personaje):
+    personaje["nivel"] += 1
+    personaje["experiencia"] = 0
+    personaje["experiencia_necesaria"] = int(personaje["experiencia_necesaria"] * 1.5)
     
-    def obtener_stats_base(self, clase):
-        """Obtener stats iniciales según la clase"""
-        stats = {
-            "guerrero": {
-                "vida_maxima": 120,
-                "mana_maximo": 30,
-                "ataque": 18,
-                "defensa": 15,
-                "velocidad": 8
-            },
-            "mago": {
-                "vida_maxima": 80,
-                "mana_maximo": 100,
-                "ataque": 12,
-                "defensa": 8,
-                "velocidad": 10
-            },
-            "arquero": {
-                "vida_maxima": 90,
-                "mana_maximo": 50,
-                "ataque": 16,
-                "defensa": 10,
-                "velocidad": 14
-            }
-        }
-        return stats.get(clase, stats["guerrero"])
+    personaje["vida_maxima"] += 10
+    personaje["ataque"] += 2
+    personaje["defensa"] += 1
+    personaje["velocidad"] += 1
     
-    def obtener_habilidades_iniciales(self, clase):
-        """Obtener habilidades iniciales según clase"""
-        habilidades = {
-            "guerrero": ["Golpe Poderoso", "Defender"],
-            "mago": ["Bola de Fuego", "Curar"],
-            "arquero": ["Disparo Preciso", "Esquivar"]
-        }
-        return habilidades.get(clase, ["Ataque Básico"])
+    personaje["vida_actual"] = personaje["vida_maxima"]
+    personaje["mana_actual"] = personaje["mana_maximo"]
     
-    def atacar(self, objetivo):
-        """Ataque básico del personaje"""
-        daño = max(1, self.ataque - (objetivo.defensa // 2))
-        objetivo.recibir_daño(daño)
-        return daño
-    
-    def recibir_daño(self, daño):
-        """Recibir daño"""
-        self.vida_actual = max(0, self.vida_actual - daño)
-        return self.vida_actual > 0
-    
-    def curar(self, cantidad):
-        """Curar al personaje"""
-        self.vida_actual = min(self.vida_maxima, self.vida_actual + cantidad)
-    
-    def esta_vivo(self):
-        """Verificar si el personaje está vivo"""
-        return self.vida_actual > 0
-    
-    def ganar_experiencia(self, exp):
-        """Ganar experiencia y subir de nivel si es necesario"""
-        self.experiencia += exp
-        if self.experiencia >= self.experiencia_necesaria:
-            self.subir_nivel()
-    
-    def subir_nivel(self):
-        """Subir de nivel"""
-        self.nivel += 1
-        self.experiencia = 0
-        self.experiencia_necesaria = int(self.experiencia_necesaria * 1.5)
-        
-        self.vida_maxima += 10
-        self.ataque += 2
-        self.defensa += 1
-        self.velocidad += 1
-        
-        self.vida_actual = self.vida_maxima
-        self.mana_actual = self.mana_maximo
-        
-        return f"¡{self.nombre} ha subido al nivel {self.nivel}!"
+    return f"¡{personaje['nombre']} ha subido al nivel {personaje['nivel']}!"

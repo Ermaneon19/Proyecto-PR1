@@ -1,67 +1,72 @@
 import random
 
-class SistemaCombate:
-    def __init__(self):
-        self.log = []
+log_combate = []
+
+def limpiar_log():
+    global log_combate
+    log_combate = []
+
+def agregar_log(mensaje):
+    global log_combate
+    log_combate.append(mensaje)
+    print(mensaje)
+
+def iniciar_combate(jugador, enemigo):
+    limpiar_log()
+    agregar_log(f"¡Combate contra {enemigo['nombre']}!")
     
-    def iniciar_combate(self, jugador, enemigo):
-        """Iniciar un combate entre jugador y enemigo"""
-        self.log.clear()
-        self.agregar_log(f"¡Combate contra {enemigo.nombre}!")
+    turno = 1
+    while jugador["vida_actual"] > 0 and enemigo["vida_actual"] > 0:
+        agregar_log(f"\n--- Turno {turno} ---")
         
-        turno = 1
-        while jugador.esta_vivo() and enemigo.esta_vivo():
-            self.agregar_log(f"\n--- Turno {turno} ---")
-            
-            if jugador.velocidad >= enemigo.velocidad:
-                self.turno_jugador(jugador, enemigo)
-                if enemigo.esta_vivo():
-                    self.turno_enemigo(enemigo, jugador)
-            else:
-                self.turno_enemigo(enemigo, jugador)
-                if jugador.esta_vivo():
-                    self.turno_jugador(jugador, enemigo)
-            
-            turno += 1
-        
-        return self.finalizar_combate(jugador, enemigo)
-    
-    def turno_jugador(self, jugador, enemigo):
-        """Turno del jugador (esto se expandirá con la interfaz)"""
-        # Por ahora, ataque básico automático
-        daño = jugador.atacar(enemigo)
-        self.agregar_log(f"{jugador.nombre} ataca a {enemigo.nombre} por {daño} de daño")
-        
-        if not enemigo.esta_vivo():
-            self.agregar_log(f"¡{enemigo.nombre} ha sido derrotado!")
-    
-    def turno_enemigo(self, enemigo, jugador):
-        """Turno del enemigo"""
-        accion = enemigo.elegir_accion(jugador)
-        
-        if accion == "atacar":
-            daño = enemigo.atacar(jugador)
-            self.agregar_log(f"{enemigo.nombre} ataca a {jugador.nombre} por {daño} de daño")
-        elif accion == "habilidad_especial":
-            daño = enemigo.ataque * 1.5
-            jugador.recibir_daño(int(daño))
-            self.agregar_log(f"{enemigo.nombre} usa habilidad especial por {int(daño)} de daño")
-        
-        if not jugador.esta_vivo():
-            self.agregar_log(f"¡{jugador.nombre} ha sido derrotado!")
-    
-    def finalizar_combate(self, jugador, enemigo):
-        """Finalizar el combate y determinar resultados"""
-        if jugador.esta_vivo():
-            exp_ganada = enemigo.experiencia_otorgada
-            jugador.ganar_experiencia(exp_ganada)
-            self.agregar_log(f"\n¡Victoria! Ganas {exp_ganada} de experiencia")
-            return True
+        if jugador["velocidad"] >= enemigo["velocidad"]:
+            turno_jugador(jugador, enemigo)
+            if enemigo["vida_actual"] > 0:
+                turno_enemigo(enemigo, jugador)
         else:
-            self.agregar_log(f"\n¡Derrota! {jugador.nombre} ha caído en combate")
-            return False
+            turno_enemigo(enemigo, jugador)
+            if jugador["vida_actual"] > 0:
+                turno_jugador(jugador, enemigo)
+        
+        turno += 1
     
-    def agregar_log(self, mensaje):
-        """Agregar mensaje al log del combate"""
-        self.log.append(mensaje)
-        print(mensaje)
+    return finalizar_combate(jugador, enemigo)
+
+def turno_jugador(jugador, enemigo):
+    from modules.personaje import atacar_personaje
+    daño = atacar_personaje(jugador, enemigo)
+    agregar_log(f"{jugador['nombre']} ataca a {enemigo['nombre']} por {daño} de daño")
+    
+    if enemigo["vida_actual"] <= 0:
+        agregar_log(f"¡{enemigo['nombre']} ha sido derrotado!")
+
+def turno_enemigo(enemigo, jugador):
+    from modules.enemigo import elegir_accion_enemigo, atacar_enemigo
+    accion = elegir_accion_enemigo(enemigo, jugador)
+    
+    if accion == "atacar":
+        daño = atacar_enemigo(enemigo, jugador)
+        agregar_log(f"{enemigo['nombre']} ataca a {jugador['nombre']} por {daño} de daño")
+    elif accion == "habilidad_especial":
+        from modules.personaje import recibir_daño_personaje
+        daño = int(enemigo["ataque"] * 1.5)
+        recibir_daño_personaje(jugador, daño)
+        agregar_log(f"{enemigo['nombre']} usa habilidad especial por {daño} de daño")
+    
+    if jugador["vida_actual"] <= 0:
+        agregar_log(f"¡{jugador['nombre']} ha sido derrotado!")
+
+def finalizar_combate(jugador, enemigo):
+    from modules.personaje import ganar_experiencia
+    if jugador["vida_actual"] > 0:
+        exp_ganada = enemigo["experiencia_otorgada"]
+        ganar_experiencia(jugador, exp_ganada)
+        agregar_log(f"\n¡Victoria! Ganas {exp_ganada} de experiencia")
+        return True
+    else:
+        agregar_log(f"\n¡Derrota! {jugador['nombre']} ha caído en combate")
+        return False
+
+def obtener_log():
+    global log_combate
+    return log_combate
