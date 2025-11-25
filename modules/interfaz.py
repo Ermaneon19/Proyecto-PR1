@@ -1,3 +1,4 @@
+# Importar librerías necesarias para la interfaz gráfica
 import ttkbootstrap as ttk
 from ttkbootstrap.constants import *
 from ttkbootstrap.widgets import Meter
@@ -6,6 +7,7 @@ from PIL import Image, ImageTk
 import os
 import random
 
+# Diccionario global que almacena referencias a todos los widgets y datos de la interfaz
 estado_interfaz = {
     "root": None,
     "container": None,
@@ -30,22 +32,33 @@ estado_interfaz = {
     "frame_menu_objetos": None
 }
 
+# Función para obtener el diccionario del jugador actual
 def obtener_jugador():
     import main
     return main.jugador_actual
 
+# Función para obtener los datos del juego (enemigos, habilidades, equipo)
 def obtener_datos():
     import main
+    # Inicializar si no existe
+    if not main.datos_juego:
+        main.datos_juego = {}
+    # Recargar si no hay enemigos
+    if not main.datos_juego.get('enemigos') or len(main.datos_juego.get('enemigos', [])) == 0:
+        main.cargar_datos()
     return main.datos_juego
 
+# Función para obtener la ventana principal
 def obtener_root():
     import main
     return main.root_ventana
 
+# Función para limpiar la pantalla actual
 def limpiar_pantalla():
     if estado_interfaz["frame_actual"]:
         estado_interfaz["frame_actual"].destroy()
 
+# Función para mostrar un mensaje emergente al usuario
 def mostrar_mensaje(mensaje):
     ttk.dialogs.Messagebox.show_info(
         title="Información",
@@ -53,6 +66,7 @@ def mostrar_mensaje(mensaje):
         parent=estado_interfaz["root"]
     )
 
+# Función para mostrar la pantalla de inicio del juego
 def mostrar_pantalla_inicio():
     limpiar_pantalla()
     estado_interfaz["frame_actual"] = ttk.Frame(estado_interfaz["container"])
@@ -104,6 +118,7 @@ def mostrar_pantalla_inicio():
     )
     info.pack(side=BOTTOM, pady=20)
 
+# Función para actualizar la vista previa de estadísticas según la clase seleccionada
 def actualizar_stats_preview(*args):
     stats = {
         "guerrero": {"vida": 120, "ataque": 18, "defensa": 15},
@@ -118,6 +133,7 @@ def actualizar_stats_preview(*args):
     estado_interfaz["meter_ataque"].configure(amountused=stat["ataque"])
     estado_interfaz["meter_defensa"].configure(amountused=stat["defensa"])
 
+# Función para mostrar la pantalla de creación de personaje
 def mostrar_creacion_personaje():
     limpiar_pantalla()
     estado_interfaz["frame_actual"] = ttk.Frame(estado_interfaz["container"])
@@ -229,6 +245,7 @@ def mostrar_creacion_personaje():
     )
     btn_volver.pack(side=RIGHT)
 
+# Función para crear el personaje y avanzar al juego
 def crear_personaje():
     nombre = estado_interfaz["entry_nombre"].get().strip()
     clase = estado_interfaz["clase_seleccionada"].get()
@@ -243,6 +260,7 @@ def crear_personaje():
     
     mostrar_pantalla_principal()
 
+# Función para mostrar la pantalla principal del juego con pestañas
 def mostrar_pantalla_principal():
     limpiar_pantalla()
     estado_interfaz["frame_actual"] = ttk.Frame(estado_interfaz["container"])
@@ -277,6 +295,7 @@ def mostrar_pantalla_principal():
     crear_pestana_inventario(frame_inventario)
     estado_interfaz["notebook"].add(frame_inventario, text="🎒 INVENTARIO")
 
+# Función para crear la pestaña de estado del personaje
 def crear_pestana_estado(parent):
     jugador = obtener_jugador()
     
@@ -377,6 +396,7 @@ def crear_pestana_estado(parent):
     )
     btn_salir.pack(pady=15, padx=10)
 
+# Función para crear la pestaña de combate automático
 def crear_pestana_combate(parent):
     frame_principal = ttk.Frame(parent)
     frame_principal.pack(fill=BOTH, expand=True, padx=10, pady=10)
@@ -441,6 +461,7 @@ def crear_pestana_combate(parent):
         )
         btn.pack(side=LEFT, padx=5)
 
+# Función para crear la pestaña de habilidades
 def crear_pestana_habilidades(parent):
     jugador = obtener_jugador()
     
@@ -480,13 +501,14 @@ def crear_pestana_habilidades(parent):
         bootstyle="success"
     ).pack(side=LEFT)
 
+# Función para crear la pestaña de inventario
 def crear_pestana_inventario(parent):
     frame_principal = ttk.Frame(parent)
     frame_principal.pack(fill=BOTH, expand=True, padx=10, pady=10)
     
     ttk.Label(
         frame_principal,
-        text="🏆 SISTEMA DE INVENTARIO 🏆",
+        text="SISTEMA DE INVENTARIO ",
         font=("Helvetica", 16, "bold"),
         bootstyle="warning"
     ).pack(expand=True)
@@ -498,6 +520,7 @@ def crear_pestana_inventario(parent):
         bootstyle="secondary"
     ).pack(expand=True)
 
+# Función para actualizar la visualización del estado del personaje
 def actualizar_estado_personaje():
     jugador = obtener_jugador()
     if jugador:
@@ -513,11 +536,14 @@ def actualizar_estado_personaje():
             textright=f"{jugador['mana_actual']}/{jugador['mana_maximo']}"
         )
 
+# Función para iniciar una batalla con enemigo aleatorio
 def ir_a_batalla():
     datos = obtener_datos()
     enemigos_data = datos.get('enemigos', [])
-    if not enemigos_data:
-        mostrar_mensaje("No hay enemigos disponibles")
+    if not enemigos_data or len(enemigos_data) == 0:
+        print(f"DEBUG: datos = {datos}")
+        print(f"DEBUG: enemigos_data = {enemigos_data}")
+        mostrar_mensaje("No hay enemigos disponibles. Verifica que el archivo data/enemigos.csv exista.")
         return
     
     multiplicador = 1.0 + (estado_interfaz["nivel_dificultad"] - 1) * 0.15
@@ -533,6 +559,7 @@ def ir_a_batalla():
     
     mostrar_pantalla_combate(enemigo)
 
+# Función para mostrar la pantalla de combate interactivo
 def mostrar_pantalla_combate(enemigo):
     limpiar_pantalla()
     estado_interfaz["frame_actual"] = ttk.Frame(estado_interfaz["container"])
@@ -677,6 +704,7 @@ def mostrar_pantalla_combate(enemigo):
     
     estado_interfaz["frame_menu_habilidades"] = ttk.Labelframe(estado_interfaz["frame_actual"], text="Selecciona una Habilidad", bootstyle="primary")
 
+# Función para mostrar el menú de habilidades disponibles
 def mostrar_menu_habilidades():
     datos = obtener_datos()
     habilidades_data = datos.get('habilidades', [])
@@ -734,6 +762,7 @@ def mostrar_menu_habilidades():
     frame_habs.columnconfigure(0, weight=1)
     frame_habs.columnconfigure(1, weight=1)
 
+# Función para usar una habilidad seleccionada
 def usar_habilidad(habilidad):
     nombre = habilidad.get('nombre', '')
     daño = int(habilidad.get('daño_base', 0))
@@ -791,6 +820,7 @@ def usar_habilidad(habilidad):
     
     turno_enemigo()
 
+# Función para ejecutar la acción de defender
 def defender():
     jugador = obtener_jugador()
     jugador["defensa"] += 3
@@ -800,6 +830,7 @@ def defender():
     
     turno_enemigo()
 
+# Función para ejecutar el turno del enemigo
 def turno_enemigo():
     enemigo = estado_interfaz["enemigo_actual"]
     jugador = obtener_jugador()
@@ -828,6 +859,7 @@ def turno_enemigo():
         jugador["vida_actual"] = jugador["vida_maxima"]
         actualizar_combate_ui()
 
+# Función para mostrar el menú de objetos consumibles
 def mostrar_menu_objetos():
     jugador = obtener_jugador()
     inventario = jugador["inventario"]
@@ -870,6 +902,7 @@ def mostrar_menu_objetos():
     frame_objs.columnconfigure(0, weight=1)
     frame_objs.columnconfigure(1, weight=1)
 
+# Función para usar un objeto del inventario
 def usar_objeto(nombre_objeto):
     jugador = obtener_jugador()
     inventario = jugador["inventario"]

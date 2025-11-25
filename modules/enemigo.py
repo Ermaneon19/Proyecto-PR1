@@ -2,14 +2,19 @@ import random
 import csv
 import os
 
+# Función para obtener stats de un enemigo desde el archivo CSV
 def obtener_stats_desde_csv(nombre):
     csv_path = 'data/enemigos.csv'
+    
     if os.path.exists(csv_path):
         try:
+            
             with open(csv_path, 'r', encoding='utf-8') as f:
                 reader = csv.DictReader(f)
+                
                 for row in reader:
                     if row['nombre'] == nombre:
+                        
                         return {
                             'vida_maxima': int(row['vida_maxima']),
                             'ataque': int(row['ataque']),
@@ -20,6 +25,7 @@ def obtener_stats_desde_csv(nombre):
         except Exception as e:
             print(f"Error cargando enemigo desde CSV: {e}")
     
+   
     return {
         'vida_maxima': 50,
         'ataque': 12,
@@ -28,7 +34,9 @@ def obtener_stats_desde_csv(nombre):
         'experiencia_otorgada': 25
     }
 
+
 def crear_enemigo(nombre, zona="bosque", datos_enemigo=None, multiplicador_dificultad=1.0):
+    
     if datos_enemigo:
         stats = {
             'vida_maxima': int(datos_enemigo.get('vida_maxima', 50)),
@@ -38,13 +46,16 @@ def crear_enemigo(nombre, zona="bosque", datos_enemigo=None, multiplicador_dific
             'experiencia_otorgada': int(datos_enemigo.get('experiencia_otorgada', 20))
         }
     else:
+        
         stats = obtener_stats_desde_csv(nombre)
+    
     
     stats['vida_maxima'] = int(stats['vida_maxima'] * multiplicador_dificultad)
     stats['ataque'] = int(stats['ataque'] * multiplicador_dificultad)
     stats['defensa'] = int(stats['defensa'] * multiplicador_dificultad)
     stats['velocidad'] = int(stats['velocidad'] * multiplicador_dificultad)
     stats['experiencia_otorgada'] = int(stats['experiencia_otorgada'] * multiplicador_dificultad)
+    
     
     enemigo = {
         "nombre": nombre,
@@ -58,26 +69,38 @@ def crear_enemigo(nombre, zona="bosque", datos_enemigo=None, multiplicador_dific
     }
     return enemigo
 
+
 def atacar_enemigo(enemigo, objetivo):
     from modules.personaje import recibir_daño_personaje
+    
     daño = max(1, enemigo["ataque"] - (objetivo["defensa"] // 3))
+    
     recibir_daño_personaje(objetivo, daño)
     return daño
 
+# Función para que el enemigo reciba daño
 def recibir_daño_enemigo(enemigo, daño):
+   
     enemigo["vida_actual"] = max(0, enemigo["vida_actual"] - daño)
+    
     return enemigo["vida_actual"] > 0
 
+# Función para verificar si el enemigo está vivo
 def esta_vivo_enemigo(enemigo):
     return enemigo["vida_actual"] > 0
 
+# Función para que el enemigo elija una acción 
 def elegir_accion_enemigo(enemigo, jugador):
+    
     if enemigo["vida_actual"] < enemigo["vida_maxima"] * 0.3 and random.random() < 0.2:
         return "habilidad_especial"
+   
     return "atacar"
 
+# Función para que el enemigo use una habilidad aleatoria
 def usar_habilidad_aleatoria_enemigo(enemigo, objetivo):
     from modules.personaje import recibir_daño_personaje
+    
     habilidades = [
         {
             "nombre": "Ataque Feroz",
@@ -101,13 +124,18 @@ def usar_habilidad_aleatoria_enemigo(enemigo, objetivo):
         }
     ]
     
+    # Elegir habilidad aleatoria
     habilidad = random.choice(habilidades)
     
+    # Calcular daño con el multiplicador de la habilidad
     daño_base = enemigo["ataque"] * habilidad["daño_multiplier"]
+    # Aplicar defensa del objetivo
     daño = max(1, int(daño_base) - (objetivo["defensa"] // 3))
     
+    # Aplicar daño al objetivo
     recibir_daño_personaje(objetivo, daño)
     
+    # Retornar información del ataque
     return {
         "nombre": habilidad["nombre"],
         "daño": daño,
