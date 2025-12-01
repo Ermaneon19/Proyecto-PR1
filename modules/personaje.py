@@ -8,21 +8,21 @@ def obtener_stats_base(clase):
             "vida_maxima": 120,
             "mana_maximo": 30,
             "ataque": 18,
-            "defensa": 15,
+            "defensa": 20,
             "velocidad": 8
         },
         "mago": {
             "vida_maxima": 80,
             "mana_maximo": 100,
-            "ataque": 12,
-            "defensa": 8,
+            "ataque": 20,
+            "defensa": 5,
             "velocidad": 10
         },
         "arquero": {
             "vida_maxima": 90,
             "mana_maximo": 50,
-            "ataque": 16,
-            "defensa": 10,
+            "ataque": 30,
+            "defensa": 2,
             "velocidad": 14
         }
     }

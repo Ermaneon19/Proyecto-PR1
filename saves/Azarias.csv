@@ -1,0 +1,2 @@
+nombre,clase,nivel,experiencia,experiencia_necesaria,vida_actual,vida_maxima,mana_actual,mana_maximo,ataque,defensa,velocidad,nivel_dificultad,equipo,habilidades,inventario
+Azarias,mago,1,62,100,80,80,15,100,20,8,10,3,{},"[""Bola de Fuego"", ""Curar""]","{""Poción de Mana Pequeña"": {""cantidad"": 3, ""tipo"": ""consumible"", ""mana"": 20}, ""Poción de Mana Grande"": {""cantidad"": 1, ""tipo"": ""consumible"", ""mana"": 50}}"
